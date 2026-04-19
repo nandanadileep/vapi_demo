@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&family=Noto+Sans+Malayalam&family=Noto+Sans+Tamil&family=Noto+Sans+Telugu&family=Noto+Sans+Kannada&display=swap');
+
 /* Plain CSS layer: base colors & font stack always ship with the bundle
    (independent of Tailwind utility generation). */
 html {
@@ -21,7 +23,7 @@ body {
 
 @layer base {
   :root {
-    /* Warm clinic canvas + teal brand (Bloomindial) */
+    /* Warm clinic canvas + teal brand (Gloomindial) */
     --background: 40 33% 98%;
     --foreground: 186 18% 20%;
     --card: 40 45% 99%;
@@ -130,4 +132,30 @@ body {
 .bd-nav-pills a:hover {
   background: rgba(91, 158, 170, 0.12);
   color: #2c3e3f;
+}
+
+/* Language picker pills: Indic scripts (scoped; not global body). */
+.language-picker-pill-script {
+  font-family:
+    "Noto Sans Devanagari",
+    "Noto Sans Malayalam",
+    "Noto Sans Tamil",
+    "Noto Sans Telugu",
+    "Noto Sans Kannada",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+}
+
+@keyframes lead-confirm-check-pop {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.lead-confirm-check-animate {
+  animation: lead-confirm-check-pop 400ms ease-out forwards;
 }

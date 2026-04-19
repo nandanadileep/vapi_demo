@@ -1,3 +1,4 @@
+import { getAgentDisplayNameSentenceCase } from "@/lib/agent-name";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { DEFAULT_CLINIC_ID } from "@/lib/constants";
 import { triggerVapiCall } from "@/lib/vapi";
@@ -100,6 +101,6 @@ export async function createLeadAndInitiateCall(
   return {
     kind: "ok",
     leadId,
-    message: "The agent will call you within 60 seconds",
+    message: `${getAgentDisplayNameSentenceCase()} will call you within 60 seconds`,
   };
 }

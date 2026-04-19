@@ -1,6 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import { LayoutGrid, Sparkles, Users } from "lucide-react";
+import { getAgentDisplayNameSentenceCase } from "@/lib/agent-name";
 import { DashboardStats } from "@/components/DashboardStats";
+
+/** Read `AGENT_NAME` at request time (not at build) for clinic-specific branding. */
+export const dynamic = "force-dynamic";
 import { LeadsTable } from "@/components/LeadsTable";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import {
@@ -77,6 +81,7 @@ export default async function DashboardPage() {
 
   const { ymd } = istDayBounds();
   const avg = kpis.avgRespectScore30d;
+  const agentLabel = getAgentDisplayNameSentenceCase();
 
   return (
     <div className="space-y-12 sm:space-y-14">
@@ -97,7 +102,7 @@ export default async function DashboardPage() {
               Respect is the hero metric
             </p>
             <h2 className="mt-4 text-2xl font-semibold tracking-tight text-soft-text sm:text-3xl lg:text-4xl">
-              How the agent is honoring patients
+              How {agentLabel} is honoring patients
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-soft-text/75 sm:text-base">
               Every scored call reflects autonomy, pacing, and respect on sensitive

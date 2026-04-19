@@ -31,7 +31,7 @@ export function formatPhoneForVapi(phone: string): string {
 }
 
 /**
- * Starts an outbound phone call via Vapi with the agent’s assistant configuration (Anthropic, Sarvam TTS bridge, Deepgram, tool definitions).
+ * Starts an outbound phone call via Vapi with the voice coordinator’s assistant configuration (Anthropic, Sarvam TTS bridge, Deepgram, tool definitions).
  *
  * @throws Error on missing env vars, invalid phone, network failure, non-OK HTTP status, or a Vapi response without an `id`.
  */

@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Bloomindial",
+  title: "Gloomindial",
   description:
-    "Voice-first outreach for dermatology and skin & hair clinics. Warm calls, clear follow-ups.",
+    "Gloomindial — voice-first outreach for dermatology and skin & hair clinics. Warm calls, clear follow-ups.",
 };
 
 export default function RootLayout({

@@ -28,7 +28,7 @@ function readString(obj: unknown, keys: string[]): string | undefined {
 }
 
 /**
- * Normalizes Vapi / transport variants to canonical event names used by Bloomindial.
+ * Normalizes Vapi / transport variants to canonical event names used by Gloomindial.
  */
 export function normalizeVapiEventType(raw: string): string {
   const t = raw.trim().toLowerCase();

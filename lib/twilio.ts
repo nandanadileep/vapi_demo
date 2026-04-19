@@ -1,4 +1,5 @@
 import twilio from "twilio";
+import { getAgentDisplayNameSentenceCase } from "@/lib/agent-name";
 import { formatPhoneForVapi } from "@/lib/vapi";
 
 type MessagingMode = "whatsapp" | "sms";
@@ -79,8 +80,9 @@ No pressure - reach out when you're ready.`;
       "sendPatientMessage: callbackTime is required for callback_scheduled",
     );
   }
+  const who = getAgentDisplayNameSentenceCase();
   return `Hi ${data.patientName}, we've noted your preferred callback time: ${data.callbackTime}.
-The agent will call you then from ${data.clinicName}.
+${who} will call you then from ${data.clinicName}.
 If plans change, reach us at ${data.clinicPhone}. 🌿`;
 }
 

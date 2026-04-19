@@ -170,7 +170,7 @@ export async function runSendWhatsappInfo(params: {
   });
 
   if (params.noFollowup) {
-    // INTEGRITY CHECK: When the agent promises "no follow-up calls",
+    // INTEGRITY CHECK: When the voice coordinator promises "no follow-up calls",
     // that promise is enforced at the database level here.
     // Once a lead_id is in followup_suppressions, NO automated
     // callback will ever be scheduled for them. This is not a
@@ -221,8 +221,8 @@ export async function runScheduleCallback(params: {
   // SUPPRESSION CHECK: Before scheduling ANY callback,
   // verify this lead has not opted out of follow-up calls.
   // This is the architectural integrity check: a promise made
-  // verbally by the agent is enforced here in the database.
-  // If suppressed, we return suppressed: true and the agent must
+  // verbally by the coordinator is enforced here in the database.
+  // If suppressed, we return suppressed: true and the coordinator must
   // not mention callbacks again. This cannot be overridden by
   // the prompt or by re-calling this function.
   const { data: suppressedRow, error: supErr } = await getSupabaseAdmin()

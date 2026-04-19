@@ -1,3 +1,4 @@
+import { getAgentDisplayName } from "@/lib/agent-name";
 import OPENINGS from "./openings";
 import { CORE_PROMPT } from "./core";
 
@@ -5,10 +6,12 @@ function applyOpeningTemplate(
   template: string,
   name: string,
   clinicName: string,
+  agentName: string,
 ): string {
   return template
     .replaceAll("{{name}}", name)
-    .replaceAll("{{clinic_name}}", clinicName);
+    .replaceAll("{{clinic_name}}", clinicName)
+    .replaceAll("{{agent_name}}", agentName);
 }
 
 function applyCoreTemplate(
@@ -18,13 +21,15 @@ function applyCoreTemplate(
     clinicCity: string;
     clinicPhone: string;
     languagePreference: string;
+    agentName: string;
   },
 ): string {
   return template
     .replaceAll("{{clinic_name}}", params.clinicName)
     .replaceAll("{{clinic_city}}", params.clinicCity)
     .replaceAll("{{clinic_phone}}", params.clinicPhone)
-    .replaceAll("{{language_preference}}", params.languagePreference);
+    .replaceAll("{{language_preference}}", params.languagePreference)
+    .replaceAll("{{agent_name}}", params.agentName);
 }
 
 /**
@@ -40,12 +45,14 @@ export function assemblePrompt(params: {
   clinicCity: string;
   clinicPhone: string;
 }): string {
+  const agentName = getAgentDisplayName();
   const openingTemplate =
     OPENINGS[params.languagePreference] ?? OPENINGS["hi-IN"];
   const opening = applyOpeningTemplate(
     openingTemplate,
     params.name,
     params.clinicName,
+    agentName,
   );
 
   let core = applyCoreTemplate(CORE_PROMPT, {
@@ -53,6 +60,7 @@ export function assemblePrompt(params: {
     clinicCity: params.clinicCity,
     clinicPhone: params.clinicPhone,
     languagePreference: params.languagePreference,
+    agentName,
   });
 
   if (params.concern) {

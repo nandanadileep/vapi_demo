@@ -14,7 +14,7 @@ export function DashboardBrand() {
           Clinic owner
         </p>
         <h1 className="truncate text-lg font-semibold tracking-tight text-soft-text sm:text-xl">
-          Bloomindial
+          Gloomindial
         </h1>
       </div>
     </div>
