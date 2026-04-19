@@ -10,7 +10,8 @@ create table leads (
   language_preference text default 'hi-IN',
   detected_language text,
   no_followup boolean default false,
-  status text default 'new'
+  status text default 'new',
+  clinic_id uuid not null default '00000000-0000-0000-0000-000000000001'
 );
 
 -- calls
@@ -26,7 +27,8 @@ create table calls (
   summary text,
   respect_score int,
   language_used text,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  clinic_id uuid not null default '00000000-0000-0000-0000-000000000001'
 );
 
 -- bookings
@@ -38,7 +40,8 @@ create table bookings (
   slot_end timestamptz not null,
   google_event_id text,
   whatsapp_sent boolean default false,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  clinic_id uuid not null default '00000000-0000-0000-0000-000000000001'
 );
 
 -- followup_suppressions
