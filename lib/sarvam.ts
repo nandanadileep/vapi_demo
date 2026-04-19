@@ -43,6 +43,7 @@ export async function synthesizeSpeech(params: {
   const body = {
     inputs: [params.text],
     target_language_code: params.language,
+    // Sarvam Bulbul v3 voice id (API slug), not the assistant display name.
     speaker: params.speaker ?? "priya",
     pace: params.pace ?? 1.0,
     model: "bulbul:v3",

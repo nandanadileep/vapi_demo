@@ -288,8 +288,8 @@ export async function createCalendarEvent(params: {
     const res = await calendar.events.insert({
       calendarId,
       requestBody: {
-        summary: `Consultation – ${params.patientName}`,
-        description: `Patient: ${params.patientName}\nPhone: ${params.patientPhone}\n\nConcern summary:\n${params.concernSummary}\n\nClinic: ${params.clinicName}`,
+        summary: `Dermatology visit - ${params.patientName}`,
+        description: `Patient: ${params.patientName}\nPhone: ${params.patientPhone}\n\nReason for visit / notes:\n${params.concernSummary}\n\nClinic: ${params.clinicName}`,
         start: {
           dateTime: startDate.toISOString(),
           timeZone: IST,

@@ -101,7 +101,7 @@ if (supabaseUrlRaw && !validHttpUrl(supabaseUrlRaw)) {
   const idx = missing.indexOf("NEXT_PUBLIC_SUPABASE_URL");
   if (idx !== -1) missing.splice(idx, 1);
   missing.push(
-    "NEXT_PUBLIC_SUPABASE_URL (invalid URL — use full https://…supabase.co from Supabase dashboard)",
+    "NEXT_PUBLIC_SUPABASE_URL (invalid URL: use full https://…supabase.co from Supabase dashboard)",
   );
 }
 

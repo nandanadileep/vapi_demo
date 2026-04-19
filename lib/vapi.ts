@@ -31,7 +31,7 @@ export function formatPhoneForVapi(phone: string): string {
 }
 
 /**
- * Starts an outbound phone call via Vapi with Priya’s assistant configuration (Anthropic, Sarvam TTS bridge, Deepgram, tool definitions).
+ * Starts an outbound phone call via Vapi with the agent’s assistant configuration (Anthropic, Sarvam TTS bridge, Deepgram, tool definitions).
  *
  * @throws Error on missing env vars, invalid phone, network failure, non-OK HTTP status, or a Vapi response without an `id`.
  */
@@ -107,7 +107,7 @@ export async function triggerVapiCall(params: {
       functions: [
         {
           name: "check_availability",
-          description: "Check available consultation slots",
+          description: "Check available dermatology consultation slots",
           parameters: {
             type: "object",
             properties: {
@@ -120,7 +120,7 @@ export async function triggerVapiCall(params: {
         },
         {
           name: "book_consultation",
-          description: "Book a consultation slot for the patient",
+          description: "Book a dermatology consultation slot for the patient",
           parameters: {
             type: "object",
             required: ["slot_start", "concern_summary"],
@@ -132,7 +132,7 @@ export async function triggerVapiCall(params: {
               concern_summary: {
                 type: "string",
                 description:
-                  "Brief summary of patient concern in 1-2 sentences",
+                  "Brief summary of what they want help with (e.g. acne, hair fall, pigmentation, scar, aesthetic interest) in 1-2 sentences",
               },
             },
           },
@@ -146,7 +146,14 @@ export async function triggerVapiCall(params: {
             properties: {
               info_type: {
                 type: "string",
-                enum: ["general", "ivf", "iui", "costs", "doctors"],
+                enum: [
+                  "general",
+                  "skin",
+                  "hair",
+                  "aesthetic",
+                  "costs",
+                  "doctors",
+                ],
               },
               no_followup: {
                 type: "boolean",

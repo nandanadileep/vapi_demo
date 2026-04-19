@@ -3,7 +3,7 @@ import { whatsappFunctionBodySchema } from "@/lib/schemas/vapi-functions";
 import { runSendWhatsappInfo } from "@/lib/vapi-function-services";
 
 /**
- * **POST** — Vapi `send_whatsapp_info` tool handler. Sends WhatsApp and enforces follow-up suppression when requested.
+ * **POST**: Vapi `send_whatsapp_info` tool handler. Sends WhatsApp and enforces follow-up suppression when requested.
  */
 export async function POST(request: Request) {
   let json: unknown;

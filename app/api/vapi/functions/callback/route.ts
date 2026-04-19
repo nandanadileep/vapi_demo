@@ -3,7 +3,7 @@ import { callbackFunctionBodySchema } from "@/lib/schemas/vapi-functions";
 import { runScheduleCallback } from "@/lib/vapi-function-services";
 
 /**
- * **POST** — Vapi `schedule_callback` tool handler. Respects `followup_suppressions` before sending a WhatsApp callback notice.
+ * **POST**: Vapi `schedule_callback` tool handler. Respects `followup_suppressions` before sending a WhatsApp callback notice.
  */
 export async function POST(request: Request) {
   let json: unknown;

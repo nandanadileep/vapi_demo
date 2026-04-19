@@ -3,7 +3,7 @@ import { synthesizeSpeech } from "@/lib/sarvam";
 import { sarvamTtsBodySchema } from "@/lib/schemas/sarvam-tts";
 
 /**
- * **POST** — Vapi custom TTS bridge. Accepts `{ text, language? }` and returns `audio/wav` bytes from Sarvam.
+ * **POST**: Vapi custom TTS bridge. Accepts `{ text, language? }` and returns `audio/wav` bytes from Sarvam.
  * (HMAC verification deferred for demo.)
  */
 export async function POST(request: Request) {

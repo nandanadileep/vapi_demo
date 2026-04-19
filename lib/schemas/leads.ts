@@ -16,7 +16,10 @@ export const createLeadBodySchema = z.object({
     (v) => (v === "" || v === null || v === undefined ? undefined : v),
     z.string().email().optional(),
   ),
-  concern: z.string().optional(),
+  concern: z
+    .string()
+    .optional()
+    .describe("Skin, hair, or aesthetic concern / reason for visit (free text)"),
   language_preference: languagePreferenceSchema,
   source: z.string().optional().default("demo"),
 });

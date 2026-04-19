@@ -65,12 +65,13 @@ Take care 🌿`;
   }
 
   if (messageType === "clinic_info") {
+    const city = process.env.CLINIC_CITY?.trim() || "your area";
     return `Hi ${data.patientName}, here's the information you asked for from ${data.clinicName}:
-📍 Located in Bengaluru
-🌿 Specializing in IVF, IUI, and fertility preservation
-👨‍⚕️ Senior fertility specialists only
+📍 Located in ${city}
+🌿 Dermatology, skin, and hair care
+👨‍⚕️ Consultant dermatologists (and hair specialists if offered at the clinic)
 📞 Reach us anytime: ${data.clinicPhone}
-No pressure — reach out when you're ready.`;
+No pressure - reach out when you're ready.`;
   }
 
   if (!data.callbackTime) {
@@ -79,7 +80,7 @@ No pressure — reach out when you're ready.`;
     );
   }
   return `Hi ${data.patientName}, we've noted your preferred callback time: ${data.callbackTime}.
-Priya will call you then from ${data.clinicName}.
+The agent will call you then from ${data.clinicName}.
 If plans change, reach us at ${data.clinicPhone}. 🌿`;
 }
 

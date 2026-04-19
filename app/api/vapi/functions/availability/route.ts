@@ -3,7 +3,7 @@ import { availabilityFunctionBodySchema } from "@/lib/schemas/vapi-functions";
 import { runCheckAvailability } from "@/lib/vapi-function-services";
 
 /**
- * **POST** — Vapi `check_availability` tool handler. Returns `{ result: stringified JSON }` for the assistant.
+ * **POST**: Vapi `check_availability` tool handler. Returns `{ result: stringified JSON }` for the assistant.
  */
 export async function POST(request: Request) {
   let json: unknown;

@@ -3,7 +3,7 @@ import { bookFunctionBodySchema } from "@/lib/schemas/vapi-functions";
 import { runBookConsultation } from "@/lib/vapi-function-services";
 
 /**
- * **POST** — Vapi `book_consultation` tool handler. Persists booking, creates Google Calendar event, sends WhatsApp confirmation.
+ * **POST**: Vapi `book_consultation` tool handler. Persists booking, creates Google Calendar event, sends WhatsApp confirmation.
  */
 export async function POST(request: Request) {
   let json: unknown;

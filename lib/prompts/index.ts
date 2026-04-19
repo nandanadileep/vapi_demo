@@ -56,7 +56,7 @@ export function assemblePrompt(params: {
   });
 
   if (params.concern) {
-    core += `\n# PATIENT CONTEXT\nThis patient reached out about: ${params.concern}\nReference this naturally in conversation — do not repeat it back verbatim.`;
+    core += `\n# PATIENT CONTEXT\nThis patient reached out about: ${params.concern}\nReference this naturally in conversation. Do not repeat it back verbatim.`;
   }
 
   return `${opening.trim()}\n\n${core.trim()}`;

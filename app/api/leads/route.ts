@@ -4,7 +4,7 @@ import { formatPhoneForVapi } from "@/lib/vapi";
 import { createLeadAndInitiateCall } from "@/lib/lead-intake";
 
 /**
- * **POST** — Creates a lead, persists it in Supabase, and triggers Priya’s outbound Vapi call.
+ * **POST**: Creates a lead, persists it in Supabase, and triggers the agent’s outbound Vapi call.
  */
 export async function POST(request: Request) {
   let json: unknown;
