@@ -1,15 +1,33 @@
-import type { Config } from "tailwindcss";
+import path from "path";
+import { fileURLToPath } from "url";
 import tailwindcssAnimate from "tailwindcss-animate";
 
-const config: Config = {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** @type {import('tailwindcss').Config} */
+const config = {
   darkMode: ["class"],
+  // Resolve from this config file so Tailwind always scans `app/` + `components/`
+  // even when `process.cwd()` is not the Next project root (e.g. some IDE / monorepo runs).
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    path.join(__dirname, "app/**/*.{js,ts,jsx,tsx,mdx}"),
+    path.join(__dirname, "components/**/*.{js,ts,jsx,tsx,mdx}"),
+    path.join(__dirname, "pages/**/*.{js,ts,jsx,tsx,mdx}"),
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          "var(--font-inter)",
+          "ui-sans-serif",
+          "system-ui",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -45,11 +63,11 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
+          1: "hsl(var(--chart-1))",
+          2: "hsl(var(--chart-2))",
+          3: "hsl(var(--chart-3))",
+          4: "hsl(var(--chart-4))",
+          5: "hsl(var(--chart-5))",
         },
         "teal-primary": "#5B9EAA",
         "warm-off-white": "#FAF7F2",
