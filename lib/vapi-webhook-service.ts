@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { DEFAULT_CLINIC_ID } from "@/lib/constants";
 import {
   analyzeTranscriptWithClaude,
@@ -28,7 +28,7 @@ function readString(obj: unknown, keys: string[]): string | undefined {
 }
 
 /**
- * Normalizes Vapi / transport variants to canonical event names used by EmpathyFlow.
+ * Normalizes Vapi / transport variants to canonical event names used by Bloomindial.
  */
 export function normalizeVapiEventType(raw: string): string {
   const t = raw.trim().toLowerCase();
@@ -143,7 +143,7 @@ async function handleCallStarted(body: unknown): Promise<void> {
     return;
   }
 
-  const { data: lead, error: leadErr } = await supabaseAdmin
+  const { data: lead, error: leadErr } = await getSupabaseAdmin()
     .from("leads")
     .select("id")
     .eq("id", leadId)
@@ -154,7 +154,7 @@ async function handleCallStarted(body: unknown): Promise<void> {
     return;
   }
 
-  const { error: upsertErr } = await supabaseAdmin.from("calls").upsert(
+  const { error: upsertErr } = await getSupabaseAdmin().from("calls").upsert(
     {
       lead_id: leadId,
       vapi_call_id: callId,
@@ -169,7 +169,7 @@ async function handleCallStarted(body: unknown): Promise<void> {
     return;
   }
 
-  const { error: leadUpdateErr } = await supabaseAdmin
+  const { error: leadUpdateErr } = await getSupabaseAdmin()
     .from("leads")
     .update({ status: "calling" })
     .eq("id", leadId);
@@ -199,7 +199,7 @@ async function handleCallEnded(body: unknown): Promise<void> {
   const durationSeconds = durationSecondsFromIso(started, ended);
   const leadId = extractLeadIdFromMetadata(body);
 
-  const { data: callRow, error: callFindErr } = await supabaseAdmin
+  const { data: callRow, error: callFindErr } = await getSupabaseAdmin()
     .from("calls")
     .select("id, lead_id")
     .eq("vapi_call_id", vapiCallId)
@@ -216,7 +216,7 @@ async function handleCallEnded(body: unknown): Promise<void> {
     return;
   }
 
-  const { data: leadRow, error: leadErr } = await supabaseAdmin
+  const { data: leadRow, error: leadErr } = await getSupabaseAdmin()
     .from("leads")
     .select("language_preference")
     .eq("id", resolvedLeadId)
@@ -239,7 +239,7 @@ async function handleCallEnded(body: unknown): Promise<void> {
   const summary = artifactSummary ?? claude.summary;
   const outcome = heuristicOutcome;
 
-  const { error: callUpdateErr } = await supabaseAdmin
+  const { error: callUpdateErr } = await getSupabaseAdmin()
     .from("calls")
     .update({
       ended_at: ended ?? new Date().toISOString(),
@@ -258,7 +258,7 @@ async function handleCallEnded(body: unknown): Promise<void> {
   }
 
   const leadStatus = mapLeadStatusForOutcome(outcome);
-  const { error: leadUpdateErr } = await supabaseAdmin
+  const { error: leadUpdateErr } = await getSupabaseAdmin()
     .from("leads")
     .update({ status: leadStatus })
     .eq("id", resolvedLeadId);
@@ -286,7 +286,7 @@ async function handleTranscriptUpdated(body: unknown): Promise<void> {
   if (!Array.isArray(transcript) || transcript.length === 0) {
     return;
   }
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from("calls")
     .update({ transcript })
     .eq("vapi_call_id", vapiCallId);

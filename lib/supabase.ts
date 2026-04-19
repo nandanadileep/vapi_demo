@@ -76,38 +76,53 @@ export type FollowupSuppression = {
 };
 
 function requireEnv(name: string, value: string | undefined): string {
-  if (!value) {
+  const trimmed = value?.trim();
+  if (!trimmed) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
-  return value;
+  return trimmed;
 }
 
-const url = requireEnv(
-  "NEXT_PUBLIC_SUPABASE_URL",
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-);
-const anonKey = requireEnv(
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-);
-const serviceRoleKey = requireEnv(
-  "SUPABASE_SERVICE_ROLE_KEY",
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-);
+let browserClient: SupabaseClient | null = null;
+let adminClient: SupabaseClient | null = null;
 
 /**
  * Supabase client for **browser / client components** using the public anon key.
- * Do not use for privileged operations — use {@link supabaseAdmin} on the server instead.
+ * Lazily validates env on first use so importing this module never throws.
  */
-export const supabase: SupabaseClient = createClient(url, anonKey);
+export function getSupabase(): SupabaseClient {
+  if (!browserClient) {
+    browserClient = createClient(
+      requireEnv("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL),
+      requireEnv(
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      ),
+    );
+  }
+  return browserClient;
+}
 
 /**
- * Supabase client for **server-only** code paths (API routes, server actions) using the service role key.
+ * Supabase client for **server-only** code paths (API routes, RSC, server actions)
+ * using the service role key. Lazily validates env on first use.
  * Never expose this client or its key to the browser.
  */
-export const supabaseAdmin: SupabaseClient = createClient(url, serviceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+export function getSupabaseAdmin(): SupabaseClient {
+  if (!adminClient) {
+    adminClient = createClient(
+      requireEnv("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL),
+      requireEnv(
+        "SUPABASE_SERVICE_ROLE_KEY",
+        process.env.SUPABASE_SERVICE_ROLE_KEY,
+      ),
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      },
+    );
+  }
+  return adminClient;
+}

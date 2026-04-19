@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { DEFAULT_CLINIC_ID } from "@/lib/constants";
 import { triggerVapiCall } from "@/lib/vapi";
 import type { CreateLeadBody } from "@/lib/schemas/leads";
@@ -37,7 +37,7 @@ export async function createLeadAndInitiateCall(
   const email =
     input.email === undefined || input.email === "" ? null : input.email;
 
-  const { data: lead, error: insertError } = await supabaseAdmin
+  const { data: lead, error: insertError } = await getSupabaseAdmin()
     .from("leads")
     .insert({
       name: input.name,
@@ -71,7 +71,7 @@ export async function createLeadAndInitiateCall(
     });
   } catch (err) {
     console.error("createLeadAndInitiateCall: Vapi trigger failed", err);
-    const { error: revertErr } = await supabaseAdmin
+    const { error: revertErr } = await getSupabaseAdmin()
       .from("leads")
       .update({ status: "new" })
       .eq("id", leadId);
@@ -85,7 +85,7 @@ export async function createLeadAndInitiateCall(
     };
   }
 
-  const { error: statusErr } = await supabaseAdmin
+  const { error: statusErr } = await getSupabaseAdmin()
     .from("leads")
     .update({ status: "calling" })
     .eq("id", leadId);
@@ -100,6 +100,6 @@ export async function createLeadAndInitiateCall(
   return {
     kind: "ok",
     leadId,
-    message: "Priya will call you within 60 seconds",
+    message: "The agent will call you within 60 seconds",
   };
 }

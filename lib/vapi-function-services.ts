@@ -1,5 +1,5 @@
 import { addMinutes } from "date-fns";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { DEFAULT_CLINIC_ID } from "@/lib/constants";
 import { getAvailableSlots, createCalendarEvent } from "@/lib/google-calendar";
 import { sendWhatsApp } from "@/lib/twilio";
@@ -49,7 +49,7 @@ export async function runBookConsultation(params: {
   }
 
   try {
-    const { data: lead, error: leadErr } = await supabaseAdmin
+    const { data: lead, error: leadErr } = await getSupabaseAdmin()
       .from("leads")
       .select("id, name, phone")
       .eq("id", params.leadId)
@@ -75,7 +75,7 @@ export async function runBookConsultation(params: {
       clinicName,
     });
 
-    const { data: booking, error: bookErr } = await supabaseAdmin
+    const { data: booking, error: bookErr } = await getSupabaseAdmin()
       .from("bookings")
       .insert({
         lead_id: params.leadId,
@@ -112,7 +112,7 @@ export async function runBookConsultation(params: {
       };
     }
 
-    const { error: flagErr } = await supabaseAdmin
+    const { error: flagErr } = await getSupabaseAdmin()
       .from("bookings")
       .update({ whatsapp_sent: true })
       .eq("id", booking.id as string);
@@ -149,7 +149,7 @@ export async function runSendWhatsappInfo(params: {
     throw new Error("Missing CLINIC_NAME or CLINIC_PHONE");
   }
 
-  const { data: lead, error: leadErr } = await supabaseAdmin
+  const { data: lead, error: leadErr } = await getSupabaseAdmin()
     .from("leads")
     .select("id, name, phone")
     .eq("id", params.leadId)
@@ -170,12 +170,12 @@ export async function runSendWhatsappInfo(params: {
   });
 
   if (params.noFollowup) {
-    // INTEGRITY CHECK: When Priya promises "no follow-up calls",
+    // INTEGRITY CHECK: When the agent promises "no follow-up calls",
     // that promise is enforced at the database level here.
     // Once a lead_id is in followup_suppressions, NO automated
     // callback will ever be scheduled for them. This is not a
-    // prompt instruction — it is a database constraint.
-    const { error: supErr } = await supabaseAdmin
+    // prompt instruction; it is a database constraint.
+    const { error: supErr } = await getSupabaseAdmin()
       .from("followup_suppressions")
       .upsert(
         {
@@ -190,7 +190,7 @@ export async function runSendWhatsappInfo(params: {
       throw new Error("Failed to record follow-up suppression");
     }
 
-    const { error: leadUpdErr } = await supabaseAdmin
+    const { error: leadUpdErr } = await getSupabaseAdmin()
       .from("leads")
       .update({ no_followup: true })
       .eq("id", params.leadId);
@@ -220,12 +220,12 @@ export async function runScheduleCallback(params: {
 > {
   // SUPPRESSION CHECK: Before scheduling ANY callback,
   // verify this lead has not opted out of follow-up calls.
-  // This is the architectural integrity check — a promise made
-  // verbally by Priya is enforced here in the database.
-  // If suppressed, we return suppressed: true and Priya must
+  // This is the architectural integrity check: a promise made
+  // verbally by the agent is enforced here in the database.
+  // If suppressed, we return suppressed: true and the agent must
   // not mention callbacks again. This cannot be overridden by
   // the prompt or by re-calling this function.
-  const { data: suppressedRow, error: supErr } = await supabaseAdmin
+  const { data: suppressedRow, error: supErr } = await getSupabaseAdmin()
     .from("followup_suppressions")
     .select("lead_id")
     .eq("lead_id", params.leadId)
@@ -249,7 +249,7 @@ export async function runScheduleCallback(params: {
     throw new Error("Missing CLINIC_NAME or CLINIC_PHONE");
   }
 
-  const { data: lead, error: leadErr } = await supabaseAdmin
+  const { data: lead, error: leadErr } = await getSupabaseAdmin()
     .from("leads")
     .select("id, name, phone")
     .eq("id", params.leadId)
