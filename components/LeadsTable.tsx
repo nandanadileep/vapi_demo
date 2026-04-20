@@ -65,9 +65,6 @@ export function LeadsTable({ rows }: LeadsTableProps) {
     <div className="overflow-hidden rounded-3xl border border-soft-text/10 bg-white/95 shadow-lg shadow-black/[0.03] ring-1 ring-black/[0.02]">
       <div className="border-b border-soft-text/10 bg-gradient-to-r from-teal-primary/[0.06] to-transparent px-5 py-4 sm:px-6">
         <h2 className="text-base font-semibold text-soft-text">Recent leads</h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          Respect score reflects the latest scored call for each lead.
-        </p>
       </div>
       <Table>
         <TableHeader>

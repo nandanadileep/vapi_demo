@@ -156,7 +156,6 @@ export default async function DashboardPage() {
           leadsToday={kpis.leadsToday}
           callsCompletedToday={kpis.callsCompletedToday}
           consultationsBookedToday={kpis.consultationsBookedToday}
-          avgRespectScore30d={kpis.avgRespectScore30d}
         />
       </section>
 
