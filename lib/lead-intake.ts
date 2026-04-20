@@ -14,6 +14,8 @@ export type LeadIntakeVapiFailed = {
   kind: "vapi_failed";
   leadId: string;
   message: string;
+  /** Raw error text for operators (e.g. Vapi subscription / geography limits). */
+  vapiDetail?: string;
 };
 
 export type LeadIntakeInsertFailed = {
@@ -71,6 +73,8 @@ export async function createLeadAndInitiateCall(
       clinicCity,
     });
   } catch (err) {
+    const vapiDetail =
+      err instanceof Error ? err.message : typeof err === "string" ? err : undefined;
     console.error("createLeadAndInitiateCall: Vapi trigger failed", err);
     const { error: revertErr } = await getSupabaseAdmin()
       .from("leads")
@@ -83,6 +87,7 @@ export async function createLeadAndInitiateCall(
       kind: "vapi_failed",
       leadId,
       message: "Lead saved, call could not be initiated",
+      vapiDetail,
     };
   }
 

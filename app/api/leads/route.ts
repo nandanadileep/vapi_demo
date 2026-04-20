@@ -44,6 +44,7 @@ export async function POST(request: Request) {
         leadId: result.leadId,
         vapiError: true,
         message: result.message,
+        vapiDetail: result.vapiDetail,
       },
       { status: 202 },
     );

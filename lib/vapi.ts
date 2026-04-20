@@ -86,7 +86,8 @@ export async function triggerVapiCall(params: {
     assistant: {
       model: {
         provider: "anthropic",
-        model: "claude-sonnet-4-5",
+        // Vapi requires a dated Anthropic model id (see Vapi POST /call validation).
+        model: "claude-sonnet-4-5-20250929",
         messages: [{ role: "system", content: systemPrompt }],
       },
       voice: {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { LanguagePicker } from "@/components/LanguagePicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,11 +43,21 @@ function validateForm(data: FormData): { name?: string; phone?: string } {
   return fieldErrors;
 }
 
+/** When Vapi returns 202, explain limits without alarming the patient. */
+function patientNoticeFromVapiDetail(detail: string): string {
+  const d = detail.toLowerCase();
+  if (d.includes("international") || d.includes("free vapi numbers")) {
+    return "Our phone line could not start an automated call to your number on this setup—trial lines often cannot dial internationally. Your request is saved; use the contact below if you need us sooner.";
+  }
+  return "We could not start the automated callback from this setup. Your request is saved; our team can still reach you.";
+}
+
 export default function LeadForm() {
   const [formData, setFormData] = useState<FormData>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [postSubmitNotice, setPostSubmitNotice] = useState<string | null>(null);
   const [submittedName, setSubmittedName] = useState("");
   const [submittedLanguage, setSubmittedLanguage] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{
@@ -70,6 +80,7 @@ export default function LeadForm() {
 
     setIsSubmitting(true);
     setError(null);
+    setPostSubmitNotice(null);
 
     const body: Record<string, unknown> = {
       name: formData.name.trim(),
@@ -89,9 +100,30 @@ export default function LeadForm() {
         body: JSON.stringify(body),
       });
 
-      if (res.status === 200 || res.status === 202) {
+      let payload: {
+        vapiDetail?: string;
+        vapiError?: boolean;
+      } = {};
+      try {
+        payload = (await res.json()) as typeof payload;
+      } catch {
+        payload = {};
+      }
+
+      if (res.status === 200) {
         setSubmittedName(formData.name.trim());
         setSubmittedLanguage(formData.language_preference);
+        setPostSubmitNotice(null);
+        setIsConfirmed(true);
+        return;
+      }
+
+      if (res.status === 202) {
+        setSubmittedName(formData.name.trim());
+        setSubmittedLanguage(formData.language_preference);
+        const detail =
+          typeof payload.vapiDetail === "string" ? payload.vapiDetail : "";
+        setPostSubmitNotice(patientNoticeFromVapiDetail(detail));
         setIsConfirmed(true);
         return;
       }
@@ -108,22 +140,29 @@ export default function LeadForm() {
     LANGUAGE_DISPLAY[submittedLanguage] ?? submittedLanguage;
 
   return (
-    <div className="flex min-h-screen flex-col bg-warm-off-white text-[#2C3E3F]">
-      {/* Hero */}
-      <header className="w-full bg-teal-primary px-4 pb-10 pt-10 text-center sm:pb-12 sm:pt-14">
-        <h1 className="text-4xl font-light tracking-tight text-white sm:text-5xl">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-warm-off-white text-[#2C3E3F]">
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute -left-24 top-8 h-64 w-64 rounded-full bg-teal-primary/15 blur-3xl" />
+        <div className="absolute right-[-10%] top-16 h-72 w-72 rounded-full bg-amber-100/70 blur-3xl" />
+      </div>
+
+      <header className="relative border-b border-white/20 bg-gradient-to-b from-teal-primary to-[#4D8E99] px-4 pb-14 pt-10 text-center sm:pb-16 sm:pt-14">
+        <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90">
+          <Sparkles className="h-3.5 w-3.5" aria-hidden />
+          Premium care intake
+        </p>
+        <h1 className="mt-4 text-4xl font-light tracking-tight text-white sm:text-5xl">
           Gloomindial
         </h1>
-        <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-white/95 sm:text-lg">
+        <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/95 sm:text-lg">
           Expert skin and hair care, in the language of your heart
         </p>
-        <p className="mt-3 text-sm text-white/70">📍 Bengaluru</p>
+        <p className="mt-3 text-sm text-white/75">📍 Bengaluru</p>
       </header>
 
       {!isConfirmed ? (
         <>
-          {/* Trust bar */}
-          <div className="border-b border-soft-text/10 bg-white px-4 py-3">
+          <div className="relative border-b border-soft-text/10 bg-white/90 px-4 py-3 backdrop-blur-sm">
             <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-1 gap-y-2 text-center text-xs text-soft-text/65 sm:text-sm">
               <span className="whitespace-nowrap">✨ No pressure, ever</span>
               <span className="hidden text-soft-text/35 sm:inline" aria-hidden>
@@ -141,18 +180,20 @@ export default function LeadForm() {
             </div>
           </div>
 
-          <main className="flex flex-1 flex-col px-4 py-8 sm:py-10">
-            <div className="mx-auto w-full max-w-md flex-1">
-              <div className="rounded-2xl bg-white p-8 shadow-sm">
-                <h2 className="text-xl font-semibold text-[#2C3E3F]">
-                  Book a Consultation
-                </h2>
-                <p className="mt-2 text-sm leading-relaxed text-soft-text/75">
-                  Tell us what you&apos;re looking for. Our care coordinator will
-                  call you shortly.
-                </p>
+          <main className="relative flex flex-1 flex-col px-4 py-8 sm:py-10">
+            <div className="mx-auto w-full max-w-xl flex-1">
+              <div className="overflow-hidden rounded-[28px] border border-soft-text/10 bg-white shadow-[0_10px_40px_rgba(44,62,63,0.10)]">
+                <div className="border-b border-soft-text/10 bg-gradient-to-r from-teal-primary/10 via-white to-white px-6 py-5 sm:px-8">
+                  <h2 className="text-xl font-semibold text-[#2C3E3F] sm:text-2xl">
+                    Book a Consultation
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-soft-text/75 sm:text-[15px]">
+                    Tell us what you&apos;re looking for. Our care coordinator will
+                    call you shortly.
+                  </p>
+                </div>
 
-                <form className="mt-6 space-y-5" onSubmit={handleSubmit} noValidate>
+                <form className="space-y-5 px-6 py-6 sm:px-8 sm:py-7" onSubmit={handleSubmit} noValidate>
                   <div className="space-y-2">
                     <Label htmlFor="lead-name" className="text-[#2C3E3F]">
                       Your name
@@ -166,7 +207,7 @@ export default function LeadForm() {
                       onChange={(e) =>
                         setFormData((p) => ({ ...p, name: e.target.value }))
                       }
-                      className="border-soft-text/15"
+                      className="h-11 border-soft-text/15 bg-white/95"
                       aria-invalid={!!fieldErrors.name}
                       aria-describedby={
                         fieldErrors.name ? "lead-name-error" : undefined
@@ -198,7 +239,7 @@ export default function LeadForm() {
                       onChange={(e) =>
                         setFormData((p) => ({ ...p, phone: e.target.value }))
                       }
-                      className="border-soft-text/15"
+                      className="h-11 border-soft-text/15 bg-white/95"
                       aria-invalid={!!fieldErrors.phone}
                       aria-describedby={
                         fieldErrors.phone ? "lead-phone-error" : undefined
@@ -233,7 +274,7 @@ export default function LeadForm() {
                       onChange={(e) =>
                         setFormData((p) => ({ ...p, concern: e.target.value }))
                       }
-                      className="min-h-[5.5rem] resize-y border-soft-text/15"
+                      className="min-h-[5.5rem] resize-y border-soft-text/15 bg-white/95"
                     />
                     <p className="text-xs leading-relaxed text-soft-text/60">
                       This helps our coordinator understand your situation before
@@ -261,8 +302,8 @@ export default function LeadForm() {
                       type="submit"
                       disabled={isSubmitting}
                       className={cn(
-                        "flex h-11 w-full items-center justify-center gap-2 rounded-lg text-base font-medium text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary focus-visible:ring-offset-2 disabled:opacity-70",
-                        "bg-[#5B9EAA] hover:bg-[#4f8e99]",
+                        "flex h-11 w-full items-center justify-center gap-2 rounded-xl text-base font-medium text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-primary focus-visible:ring-offset-2 disabled:opacity-70",
+                        "bg-[#5B9EAA] shadow-md shadow-teal-primary/25 hover:bg-[#4f8e99]",
                       )}
                     >
                       {isSubmitting ? (
@@ -286,58 +327,71 @@ export default function LeadForm() {
                 </form>
               </div>
 
-              <p className="mt-6 text-center text-xs text-soft-text/60">
-                🔒 Your information is private and never shared.
-              </p>
+              <div className="mt-5 rounded-2xl border border-soft-text/10 bg-white/75 px-4 py-3 text-xs text-soft-text/65 backdrop-blur-sm">
+                <p className="flex items-center justify-center gap-2 text-center">
+                  <ShieldCheck className="h-3.5 w-3.5 text-teal-primary" aria-hidden />
+                  Your information is private and never shared.
+                </p>
+              </div>
             </div>
           </main>
         </>
       ) : (
-        <main className="flex flex-1 flex-col px-4 py-8 sm:py-10">
-          <div className="mx-auto w-full max-w-md flex-1">
-            <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-              <div className="flex justify-center">
-                <CheckCircle2
-                  className="h-16 w-16 text-teal-primary lead-confirm-check-animate"
-                  strokeWidth={1.5}
-                  aria-hidden
-                />
+        <main className="relative flex flex-1 flex-col px-4 py-8 sm:py-10">
+          <div className="mx-auto w-full max-w-xl flex-1">
+            <div className="overflow-hidden rounded-[28px] border border-soft-text/10 bg-white shadow-[0_10px_40px_rgba(44,62,63,0.10)]">
+              <div className="border-b border-soft-text/10 bg-gradient-to-r from-teal-primary/10 via-white to-white px-6 py-5 text-center sm:px-8">
+                <div className="flex justify-center">
+                  <CheckCircle2
+                    className="h-16 w-16 text-teal-primary lead-confirm-check-animate"
+                    strokeWidth={1.5}
+                    aria-hidden
+                  />
+                </div>
+                <h2 className="mt-4 text-2xl font-semibold text-[#2C3E3F]">
+                  We&apos;ll call you shortly
+                </h2>
+                {postSubmitNotice ? (
+                  <p className="mt-3 rounded-xl border border-amber-200/90 bg-amber-50/90 px-3 py-2.5 text-left text-sm leading-relaxed text-soft-text/90">
+                    {postSubmitNotice}
+                  </p>
+                ) : (
+                  <p className="mt-2 text-sm leading-relaxed text-soft-text/75">
+                    Usually within 60 seconds. Please keep your phone nearby.
+                  </p>
+                )}
+                <p className="mt-4 text-sm text-[#2C3E3F]">
+                  Hi {submittedName}, we&apos;ve received your request.
+                </p>
+                <p className="mt-2 text-sm text-soft-text/80">
+                  Our coordinator will greet you in {langDisplay}
+                </p>
               </div>
-              <h2 className="mt-4 text-2xl font-semibold text-[#2C3E3F]">
-                We&apos;ll call you shortly
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-soft-text/75">
-                Usually within 60 seconds. Please keep your phone nearby.
-              </p>
-              <p className="mt-4 text-sm text-[#2C3E3F]">
-                Hi {submittedName}, we&apos;ve received your request.
-              </p>
-              <p className="mt-2 text-sm text-soft-text/80">
-                Our coordinator will greet you in {langDisplay}
-              </p>
 
-              <Separator className="my-6 bg-soft-text/10" />
+              <div className="px-6 py-6 sm:px-8 sm:py-7">
+                <Separator className="mb-6 bg-soft-text/10" />
 
-              <p className="text-left text-sm font-semibold text-[#2C3E3F]">
-                What to expect
-              </p>
-              <ul className="mt-3 space-y-3 text-left text-sm leading-relaxed text-soft-text/80">
-                <li>
-                  📞 We&apos;ll call from an unknown number — please pick up
-                </li>
-                <li>💬 The call takes about 5–10 minutes</li>
-                <li>✨ No pressure. You can end the call anytime.</li>
-              </ul>
+                <p className="text-left text-sm font-semibold text-[#2C3E3F]">
+                  What to expect
+                </p>
+                <ul className="mt-3 space-y-3 text-left text-sm leading-relaxed text-soft-text/80">
+                  <li>
+                    📞 We&apos;ll call from an unknown number — please pick up
+                  </li>
+                  <li>💬 The call takes about 5–10 minutes</li>
+                  <li>✨ No pressure. You can end the call anytime.</li>
+                </ul>
 
-              <p className="mt-6 text-xs leading-relaxed text-soft-text/60">
-                Didn&apos;t receive a call? {phoneHelpLine}
-              </p>
+                <p className="mt-6 text-xs leading-relaxed text-soft-text/60">
+                  Didn&apos;t receive a call? {phoneHelpLine}
+                </p>
+              </div>
             </div>
           </div>
         </main>
       )}
 
-      <footer className="mt-auto border-t border-soft-text/10 py-6 text-center text-xs text-soft-text/55">
+      <footer className="relative mt-auto border-t border-soft-text/10 bg-white/40 py-6 text-center text-xs text-soft-text/55 backdrop-blur-sm">
         © 2025 Gloomindial · Bengaluru
       </footer>
     </div>

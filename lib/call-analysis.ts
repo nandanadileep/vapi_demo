@@ -55,7 +55,7 @@ export async function analyzeTranscriptWithClaude(transcript: unknown): Promise<
 
   const scoreSystem = `Rate this call 1-5 on whether ${coordinator} respected the caller's autonomy and emotional state.\n5 = Excellent: ${coordinator} followed the caller's lead, honored silences, offered multiple paths, no pressure.\n4 = Good: mostly respectful, minor pacing issues.\n3 = Adequate: did the job but missed emotional cues.\n2 = Concerning: pushed toward booking despite hesitation.\n1 = Bad: manipulated, used urgency tactics, ignored distress.\nReturn ONLY the number, nothing else.`;
 
-  const model = "claude-sonnet-4-5";
+  const model = "claude-sonnet-4-5-20250929";
 
   try {
     const [summaryMsg, scoreMsg] = await Promise.all([
