@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { LayoutGrid, Sparkles, Users } from "lucide-react";
+import { LayoutGrid, Users } from "lucide-react";
 import { getAgentDisplayNameSentenceCase } from "@/lib/agent-name";
 import { DashboardStats } from "@/components/DashboardStats";
 
@@ -97,11 +97,7 @@ export default async function DashboardPage() {
 
         <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-teal-primary/20 bg-teal-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-teal-primary">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden />
-              Clinic quality overview
-            </p>
-            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-soft-text sm:text-3xl lg:text-4xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-soft-text sm:text-3xl lg:text-4xl">
               How {agentLabel} is honoring patients
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-soft-text/75 sm:text-base">

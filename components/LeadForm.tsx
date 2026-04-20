@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CheckCircle2, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import { LanguagePicker } from "@/components/LanguagePicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,7 +47,7 @@ function validateForm(data: FormData): { name?: string; phone?: string } {
 function patientNoticeFromVapiDetail(detail: string): string {
   const d = detail.toLowerCase();
   if (d.includes("international") || d.includes("free vapi numbers")) {
-    return "Our phone line could not start an automated call to your number on this setup—trial lines often cannot dial internationally. Your request is saved; use the contact below if you need us sooner.";
+    return "Our phone line could not start an automated call to your number on this setup. Trial lines often cannot dial internationally. Your request is saved; use the contact below if you need us sooner.";
   }
   return "We could not start the automated callback from this setup. Your request is saved; our team can still reach you.";
 }
@@ -155,10 +155,6 @@ export default function LeadForm() {
             </p>
             <p className="text-xs text-muted-foreground">Premium intake desk</p>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-teal-primary/20 bg-teal-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-teal-primary">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            Premium care intake
-          </span>
         </div>
       </header>
 
@@ -188,9 +184,6 @@ export default function LeadForm() {
               </p>
 
               <div className="mt-6 grid gap-3 text-sm text-soft-text/80 sm:grid-cols-2">
-                <p className="rounded-2xl border border-soft-text/10 bg-white/80 px-4 py-3">
-                  ✨ Support at your pace
-                </p>
                 <p className="rounded-2xl border border-soft-text/10 bg-white/80 px-4 py-3">
                   👨‍⚕️ Senior dermatologists only
                 </p>
@@ -385,9 +378,8 @@ export default function LeadForm() {
                 What to expect
               </p>
               <ul className="mt-3 space-y-3 text-left text-sm leading-relaxed text-soft-text/80">
-                <li>📞 We&apos;ll call from an unknown number — please pick up</li>
+                <li>📞 We&apos;ll call from an unknown number, please pick up</li>
                 <li>💬 The call takes about 5–10 minutes</li>
-                <li>✨ No pressure. You can end the call anytime.</li>
               </ul>
               <p className="mt-6 text-xs leading-relaxed text-soft-text/60">
                 Didn&apos;t receive a call? {phoneHelpLine}
