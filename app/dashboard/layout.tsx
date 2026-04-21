@@ -3,7 +3,7 @@ import { DashboardBrand } from "@/components/DashboardBrand";
 import { DashboardNav } from "@/components/DashboardNav";
 
 export const metadata: Metadata = {
-  title: "Dashboard | Gloomindial",
+  title: "Dashboard | xyz_clinic",
   description:
     "Clinic owner overview for skin & hair practices: leads, calls, and respect scores.",
 };

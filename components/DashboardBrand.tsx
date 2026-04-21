@@ -1,6 +1,8 @@
 import { HeartPulse } from "lucide-react";
 
 export function DashboardBrand() {
+  const clinicName = process.env.CLINIC_NAME ?? "xyz_clinic";
+
   return (
     <div className="flex items-center gap-3">
       <div
@@ -14,7 +16,7 @@ export function DashboardBrand() {
           Clinic owner
         </p>
         <h1 className="truncate text-lg font-semibold tracking-tight text-soft-text sm:text-xl">
-          Gloomindial
+          {clinicName}
         </h1>
       </div>
     </div>

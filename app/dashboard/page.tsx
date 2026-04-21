@@ -10,15 +10,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import {
   fetchDashboardKpis,
   fetchLeadsForDashboard,
-  istDayBounds,
 } from "@/lib/dashboard-metrics";
-
-function formatAvg(v: number | null): string {
-  if (v === null || Number.isNaN(v)) {
-    return "-";
-  }
-  return v.toFixed(1);
-}
 
 function SectionIntro({
   icon: Icon,
@@ -79,8 +71,6 @@ export default async function DashboardPage() {
     );
   }
 
-  const { ymd } = istDayBounds();
-  const avg = kpis.avgRespectScore30d;
   const agentLabel = getAgentDisplayNameSentenceCase();
 
   return (
@@ -95,49 +85,15 @@ export default async function DashboardPage() {
           aria-hidden
         />
 
-        <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12">
+        <div className="relative">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-soft-text sm:text-3xl lg:text-4xl">
               How {agentLabel} is honoring patients
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-soft-text/75 sm:text-base">
-              Every scored call reflects autonomy, pacing, and respect on sensitive
-              skin and hair topics. The score is a rolling 30-day average on a
-              1–5 scale.
+              Every call reflects autonomy, pacing, and respect on sensitive skin
+              and hair topics.
             </p>
-            <p className="mt-6 inline-flex items-center gap-2 rounded-xl border border-soft-text/10 bg-white/70 px-3 py-2 text-xs text-soft-text/65 backdrop-blur-sm">
-              <span className="font-medium text-soft-text/80">IST today</span>
-              <span className="text-soft-text/40">·</span>
-              <span className="font-mono tabular-nums">{ymd}</span>
-            </p>
-          </div>
-
-          <div className="relative flex flex-col items-stretch gap-3 sm:flex-row sm:items-end lg:flex-col lg:items-end">
-            <div className="relative w-full max-w-sm rounded-2xl border border-teal-primary/30 bg-gradient-to-b from-teal-primary/12 to-white p-6 shadow-lg shadow-teal-primary/15 sm:max-w-xs lg:w-72">
-              <p className="text-xs font-semibold uppercase tracking-wider text-soft-text/60">
-                30-day average
-              </p>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-5xl font-bold tabular-nums tracking-tight text-teal-primary sm:text-6xl">
-                  {formatAvg(avg)}
-                </span>
-                <span className="text-2xl font-semibold text-soft-text/50">
-                  /5
-                </span>
-              </div>
-              {typeof avg === "number" ? (
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-teal-primary/15">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-teal-primary to-teal-primary/70 transition-all"
-                    style={{ width: `${Math.min(100, (avg / 5) * 100)}%` }}
-                  />
-                </div>
-              ) : (
-                <p className="mt-3 text-xs text-muted-foreground">
-                  No scored calls in the last 30 days yet.
-                </p>
-              )}
-            </div>
           </div>
         </div>
       </section>
@@ -146,7 +102,7 @@ export default async function DashboardPage() {
         <SectionIntro
           icon={LayoutGrid}
           title="Today at a glance"
-          subtitle="Volume metrics use IST midnight; the respect average uses scored calls from the last 30 days."
+          subtitle="Volume metrics for today."
         />
         <DashboardStats
           leadsToday={kpis.leadsToday}
