@@ -167,6 +167,7 @@ BEHAVIOR:
 - If booking intent is clear, go directly: check slots -> confirm slot -> book consultation.
 - Avoid filler like "what else" loops and avoid random topics.
 - If concern is unclear, ask one short clarifying question only.
+- Do not end the call on your own. End only when the user explicitly says to end.
 
 PATIENT CONTEXT:
 - Intake concern: ${params.concern || "not provided"}
@@ -202,21 +203,34 @@ function buildWebTranscriberOverride(params: {
   eotThreshold: number;
 } {
   const useEnglish = params.language === "en-IN";
-  const model = useEnglish ? params.modelEn : params.modelMulti;
-  const fluxLanguageByLocale: Record<string, string> = {
-    "en-IN": "en",
-    "hi-IN": "hi",
-    // Flux multilingual does not support ta/ml/te/kn yet.
-    // Use Hindi fallback to keep call start stable.
-    "ta-IN": "hi",
-    "ml-IN": "hi",
-    "te-IN": "hi",
-    "kn-IN": "hi",
-  };
+  if (useEnglish) {
+    return {
+      provider: "deepgram",
+      model: params.modelEn,
+      language: "en",
+      eotTimeoutMs: params.eotTimeoutMs,
+      eotThreshold: params.eotThreshold,
+    };
+  }
+
+  // Flux multilingual models do not reliably support ta/ml/te/kn.
+  // For these locales, force a robust multilingual ASR model.
+  const wantsFlux = params.modelMulti.toLowerCase().includes("flux-general");
+  const needsIndicFallback = ["ta-IN", "ml-IN", "te-IN", "kn-IN"].includes(
+    params.language,
+  );
+
+  const model =
+    wantsFlux && needsIndicFallback ? "nova-2" : params.modelMulti;
+  const language =
+    wantsFlux && params.language === "hi-IN" && !needsIndicFallback
+      ? "hi"
+      : "multi";
+
   return {
     provider: "deepgram",
     model,
-    language: fluxLanguageByLocale[params.language] ?? "hi",
+    language,
     eotTimeoutMs: params.eotTimeoutMs,
     eotThreshold: params.eotThreshold,
   };
@@ -391,6 +405,8 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
       const baseOverrides = {
         firstMessageMode: "assistant-speaks-first" as const,
         firstMessage,
+        maxDurationSeconds: 1800,
+        endCallPhrases: [],
         model: {
           provider: "openai" as const,
           model: "gpt-4.1",
