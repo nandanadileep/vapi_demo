@@ -42,6 +42,40 @@ function getDefaultSarvamPace(): number {
   return parsed;
 }
 
+function toLanguageEnvSuffix(language: string): string {
+  return language.trim().toUpperCase().replace(/[^A-Z0-9]+/g, "_");
+}
+
+function parsePace(raw: string | undefined): number | null {
+  if (!raw) {
+    return null;
+  }
+  const parsed = Number.parseFloat(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null;
+  }
+  return parsed;
+}
+
+function getSarvamSpeakerForLanguage(language: string): string {
+  const suffix = toLanguageEnvSuffix(language);
+  const byLanguage = process.env[`SARVAM_SPEAKER_${suffix}`]?.trim();
+  if (byLanguage) {
+    return byLanguage;
+  }
+  return getDefaultSarvamSpeaker();
+}
+
+function getSarvamPaceForLanguage(language: string): number {
+  const suffix = toLanguageEnvSuffix(language);
+  const byLanguageRaw = process.env[`SARVAM_PACE_${suffix}`]?.trim();
+  const byLanguage = parsePace(byLanguageRaw);
+  if (byLanguage !== null) {
+    return byLanguage;
+  }
+  return getDefaultSarvamPace();
+}
+
 /**
  * Calls Sarvam’s **Bulbul v3** TTS API and returns decoded **WAV** audio as a binary buffer.
  *
@@ -62,8 +96,8 @@ export async function synthesizeSpeech(params: {
     inputs: [params.text],
     target_language_code: params.language,
     // Sarvam Bulbul v3 voice id (API slug), not the assistant display name.
-    speaker: params.speaker?.trim() || getDefaultSarvamSpeaker(),
-    pace: params.pace ?? getDefaultSarvamPace(),
+    speaker: params.speaker?.trim() || getSarvamSpeakerForLanguage(params.language),
+    pace: params.pace ?? getSarvamPaceForLanguage(params.language),
     model: "bulbul:v3",
     enable_preprocessing: true,
   };

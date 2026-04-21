@@ -7,6 +7,9 @@ import { sarvamTtsBodySchema } from "@/lib/schemas/sarvam-tts";
  * (HMAC verification deferred for demo.)
  */
 export async function POST(request: Request) {
+  const requestUrl = new URL(request.url);
+  const queryLanguage = requestUrl.searchParams.get("language")?.trim();
+
   let json: unknown;
   try {
     json = await request.json();
@@ -23,9 +26,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    const resolvedLanguage =
+      parsed.data.language?.trim() || queryLanguage || "hi-IN";
     const buffer = await synthesizeSpeech({
       text: parsed.data.text,
-      language: parsed.data.language,
+      language: resolvedLanguage,
       speaker: parsed.data.speaker,
       pace: parsed.data.pace,
     });
