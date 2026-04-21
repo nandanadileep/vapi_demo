@@ -141,6 +141,42 @@ function buildWebFirstMessage(params: {
   return byLanguage[params.language] ?? byLanguage["en-IN"];
 }
 
+function buildWebSystemPrompt(params: {
+  language: string;
+  clinicName: string;
+  clinicCity: string;
+  clinicPhone: string;
+  concern: string;
+  agentName: string;
+}): string {
+  return `
+You are ${params.agentName}, care coordinator for ${params.clinicName} (${params.clinicCity}).
+
+STRICT DOMAIN:
+- This clinic handles ONLY dermatology / skin / hair concerns.
+- Never discuss or suggest unrelated domains (dentist, haircut, salon, general medicine, etc.).
+- Never ask budget, insurance, or payment capacity unless the patient explicitly asks about pricing.
+
+LANGUAGE:
+- Preferred language: ${params.language}
+- Stay in this language throughout unless the user clearly switches.
+
+BEHAVIOR:
+- Be calm, respectful, concise.
+- Do not ask for name or phone again (already collected in intake).
+- If booking intent is clear, go directly: check slots -> confirm slot -> book consultation.
+- Avoid filler like "what else" loops and avoid random topics.
+- If concern is unclear, ask one short clarifying question only.
+
+PATIENT CONTEXT:
+- Intake concern: ${params.concern || "not provided"}
+
+ENDING:
+- Confirm next step clearly and end politely.
+- Mention clinic phone only if needed: ${params.clinicPhone || "front desk"}.
+  `.trim();
+}
+
 function buildWebVoiceOverride(params: {
   voiceId: string;
   model: "tts-1" | "tts-1-hd" | "gpt-4o-mini-tts";
@@ -355,6 +391,23 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
       const baseOverrides = {
         firstMessageMode: "assistant-speaks-first" as const,
         firstMessage,
+        model: {
+          provider: "openai" as const,
+          model: "gpt-4.1",
+          messages: [
+            {
+              role: "system" as const,
+              content: buildWebSystemPrompt({
+                language: preferredLanguage,
+                clinicName,
+                clinicCity,
+                clinicPhone: clinicPhone || "",
+                concern: preferredConcern,
+                agentName: publicAgentName || "our care coordinator",
+              }),
+            },
+          ],
+        },
         voice: voiceOverride,
         transcriber: transcriberOverride,
         variableValues: {
