@@ -198,7 +198,7 @@ function buildWebTranscriberOverride(params: {
 }): {
   provider: "deepgram";
   model: string;
-  language: string;
+  language: "en" | "hi" | "multi";
   eotTimeoutMs: number;
   eotThreshold: number;
 } {
@@ -222,7 +222,7 @@ function buildWebTranscriberOverride(params: {
 
   const model =
     wantsFlux && needsIndicFallback ? "nova-2" : params.modelMulti;
-  const language =
+  const language: "en" | "hi" | "multi" =
     wantsFlux && params.language === "hi-IN" && !needsIndicFallback
       ? "hi"
       : "multi";
@@ -409,7 +409,7 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
         endCallPhrases: [],
         model: {
           provider: "openai" as const,
-          model: "gpt-4.1",
+          model: "gpt-4.1" as const,
           messages: [
             {
               role: "system" as const,
