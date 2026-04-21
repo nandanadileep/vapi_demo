@@ -10,6 +10,12 @@ export type LeadIntakeSuccess = {
   message: string;
 };
 
+export type LeadIntakeWebTestReady = {
+  kind: "web_test_ready";
+  leadId: string;
+  message: string;
+};
+
 export type LeadIntakeVapiFailed = {
   kind: "vapi_failed";
   leadId: string;
@@ -29,7 +35,9 @@ export type LeadIntakeInsertFailed = {
 export async function createLeadAndInitiateCall(
   input: CreateLeadBody,
   phoneE164: string,
-): Promise<LeadIntakeSuccess | LeadIntakeVapiFailed | LeadIntakeInsertFailed> {
+): Promise<
+  LeadIntakeSuccess | LeadIntakeWebTestReady | LeadIntakeVapiFailed | LeadIntakeInsertFailed
+> {
   const clinicName = process.env.CLINIC_NAME;
   const clinicCity = process.env.CLINIC_CITY;
   if (!clinicName || !clinicCity) {
@@ -61,6 +69,17 @@ export async function createLeadAndInitiateCall(
   }
 
   const leadId = lead.id as string;
+  const callMode = (process.env.CALL_MODE ?? process.env.NEXT_PUBLIC_CALL_MODE ?? "phone")
+    .trim()
+    .toLowerCase();
+
+  if (callMode === "web") {
+    return {
+      kind: "web_test_ready",
+      leadId,
+      message: "Lead saved. Start your browser voice test.",
+    };
+  }
 
   try {
     await triggerVapiCall({

@@ -50,8 +50,19 @@ export async function POST(request: Request) {
     );
   }
 
+  if (result.kind === "web_test_ready") {
+    return NextResponse.json(
+      {
+        leadId: result.leadId,
+        message: result.message,
+        callMode: "web",
+      },
+      { status: 200 },
+    );
+  }
+
   return NextResponse.json(
-    { leadId: result.leadId, message: result.message },
+    { leadId: result.leadId, message: result.message, callMode: "phone" },
     { status: 200 },
   );
 }
