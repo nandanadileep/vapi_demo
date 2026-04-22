@@ -4,6 +4,10 @@ Voice-first patient intake, follow-up, and booking workflow for dermatology / sk
 
 Built with Next.js App Router, Supabase, Vapi, Sarvam TTS, Deepgram transcription, and provider-side tools (Google Calendar + Twilio).
 
+## Product Preview
+
+![xyz_clinic intake screen](public/images/intake-preview.png)
+
 ## What This Project Does
 
 - Public intake form (`/`) for patient name, phone, concern, and preferred language.
