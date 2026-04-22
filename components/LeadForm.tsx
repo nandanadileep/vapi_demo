@@ -165,6 +165,7 @@ BEHAVIOR:
 - Be calm, respectful, concise.
 - Do not ask for name or phone again (already collected in intake).
 - If booking intent is clear, go directly: check slots -> confirm slot -> book consultation.
+- Never say a booking is confirmed unless the booking tool response explicitly returned success=true.
 - Avoid filler like "what else" loops and avoid random topics.
 - If concern is unclear, ask one short clarifying question only.
 - Do not end the call on your own. End only when the user explicitly says to end.
@@ -239,6 +240,13 @@ function buildWebTranscriberOverride(params: {
 export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
   const vapiRef = useRef<Vapi | null>(null);
   const activeWebLanguageRef = useRef<string>("en-IN");
+  const activeWebLeadIdRef = useRef<string | null>(null);
+  const activeWebVapiCallIdRef = useRef<string | null>(null);
+  const activeWebStartedAtRef = useRef<string | null>(null);
+  const activeWebTranscriptRef = useRef<Array<{ role: string; message: string }>>(
+    [],
+  );
+  const activeWebStartPersistedRef = useRef(false);
   const activeWebLeadContextRef = useRef<{
     name: string;
     phone: string;
@@ -252,6 +260,7 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
   const [submittedName, setSubmittedName] = useState("");
   const [submittedPhone, setSubmittedPhone] = useState("");
   const [submittedLanguage, setSubmittedLanguage] = useState("");
+  const [submittedLeadId, setSubmittedLeadId] = useState<string | null>(null);
   const [submittedCallMode, setSubmittedCallMode] = useState<"phone" | "web">(
     "phone",
   );
@@ -292,6 +301,18 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
     ? `Reach us at ${clinicPhone}`
     : "Reach us at our front desk";
 
+  async function persistWebCallEvent(payload: Record<string, unknown>) {
+    try {
+      await fetch("/api/web-calls/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.error("persistWebCallEvent failed", err);
+    }
+  }
+
   useEffect(() => {
     return () => {
       if (!vapiRef.current) {
@@ -330,8 +351,71 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
         triggerResponseEnabled: false,
       });
     });
+    client.on("call-start-success", (event) => {
+      const callId = typeof event?.callId === "string" ? event.callId : null;
+      if (!callId) {
+        return;
+      }
+      activeWebVapiCallIdRef.current = callId;
+      if (
+        activeWebStartPersistedRef.current ||
+        !activeWebLeadIdRef.current
+      ) {
+        return;
+      }
+      activeWebStartPersistedRef.current = true;
+      persistWebCallEvent({
+        event: "start",
+        leadId: activeWebLeadIdRef.current,
+        vapiCallId: callId,
+        startedAt: activeWebStartedAtRef.current ?? new Date().toISOString(),
+      });
+    });
+    client.on("message", (message) => {
+      const m = message as {
+        type?: string;
+        role?: string;
+        transcript?: string;
+        text?: string;
+      };
+      if (m.type !== "transcript") {
+        return;
+      }
+      const role = typeof m.role === "string" ? m.role : "unknown";
+      const text =
+        typeof m.transcript === "string"
+          ? m.transcript
+          : typeof m.text === "string"
+            ? m.text
+            : "";
+      if (!text.trim()) {
+        return;
+      }
+      activeWebTranscriptRef.current.push({ role, message: text });
+    });
     client.on("call-end", () => {
       setWebCallState("idle");
+      const leadId = activeWebLeadIdRef.current;
+      const callId = activeWebVapiCallIdRef.current;
+      if (leadId && callId) {
+        const startedAt = activeWebStartedAtRef.current
+          ? Date.parse(activeWebStartedAtRef.current)
+          : Number.NaN;
+        const now = Date.now();
+        const durationSeconds =
+          Number.isFinite(startedAt) && startedAt > 0
+            ? Math.max(0, Math.round((now - startedAt) / 1000))
+            : undefined;
+        persistWebCallEvent({
+          event: "end",
+          leadId,
+          vapiCallId: callId,
+          endedAt: new Date(now).toISOString(),
+          durationSeconds,
+          transcript: activeWebTranscriptRef.current,
+          languageUsed: activeWebLanguageRef.current,
+        });
+      }
     });
     client.on("error", (error) => {
       setWebCallState("idle");
@@ -373,6 +457,17 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
       const preferredName = submittedName || formData.name.trim();
       const preferredPhone = submittedPhone || formData.phone.trim();
       const preferredConcern = formData.concern.trim();
+      const leadId = submittedLeadId;
+      if (!leadId) {
+        setWebCallError("Missing lead id for web call. Please submit the form again.");
+        setWebCallState("idle");
+        return;
+      }
+      activeWebLeadIdRef.current = leadId;
+      activeWebVapiCallIdRef.current = null;
+      activeWebStartedAtRef.current = new Date().toISOString();
+      activeWebTranscriptRef.current = [];
+      activeWebStartPersistedRef.current = false;
       activeWebLanguageRef.current = preferredLanguage;
       activeWebLeadContextRef.current = {
         name: preferredName,
@@ -407,6 +502,10 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
         firstMessage,
         maxDurationSeconds: 1800,
         endCallPhrases: [],
+        metadata: {
+          leadId,
+          languagePreference: preferredLanguage,
+        },
         model: {
           provider: "openai" as const,
           model: "gpt-4.1" as const,
@@ -470,6 +569,7 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
       });
 
       let payload: {
+        leadId?: string;
         vapiDetail?: string;
         vapiError?: boolean;
         callMode?: "phone" | "web";
@@ -486,6 +586,9 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
         setSubmittedName(formData.name.trim());
         setSubmittedPhone(formData.phone.trim());
         setSubmittedLanguage(formData.language_preference);
+        setSubmittedLeadId(
+          typeof payload.leadId === "string" ? payload.leadId : null,
+        );
         setSubmittedCallMode(payload.callMode === "web" ? "web" : "phone");
         setWebCallState("idle");
         setWebCallError(null);
@@ -498,6 +601,9 @@ export default function LeadForm({ clinicName, clinicCity }: LeadFormProps) {
         setSubmittedName(formData.name.trim());
         setSubmittedPhone(formData.phone.trim());
         setSubmittedLanguage(formData.language_preference);
+        setSubmittedLeadId(
+          typeof payload.leadId === "string" ? payload.leadId : null,
+        );
         setSubmittedCallMode("phone");
         setWebCallState("idle");
         setWebCallError(null);

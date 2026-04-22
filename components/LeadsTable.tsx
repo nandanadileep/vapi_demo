@@ -15,19 +15,6 @@ export type LeadsTableProps = {
   rows: LeadTableRow[];
 };
 
-function respectTone(score: number | null): string {
-  if (score === null) {
-    return "border-muted-foreground/30 bg-muted text-muted-foreground";
-  }
-  if (score >= 4) {
-    return "border-teal-primary/50 bg-teal-primary/10 text-teal-primary";
-  }
-  if (score >= 3) {
-    return "border-amber-500/40 bg-amber-50 text-amber-900";
-  }
-  return "border-destructive/30 bg-destructive/10 text-destructive";
-}
-
 function formatWhen(iso: string): string {
   const d = Date.parse(iso);
   if (Number.isNaN(d)) {
@@ -40,9 +27,7 @@ function formatWhen(iso: string): string {
   }).format(d);
 }
 
-/**
- * Recent leads with latest-call respect score highlighted; links to call detail when a call exists.
- */
+/** Recent leads with quick links to call detail when a call exists. */
 export function LeadsTable({ rows }: LeadsTableProps) {
   if (!rows.length) {
     return (
@@ -69,10 +54,7 @@ export function LeadsTable({ rows }: LeadsTableProps) {
       <Table>
         <TableHeader>
           <TableRow className="border-soft-text/10 hover:bg-transparent">
-            <TableHead className="w-28 pl-5 text-soft-text sm:pl-6">
-              Respect
-            </TableHead>
-            <TableHead className="text-soft-text">Name</TableHead>
+            <TableHead className="pl-5 text-soft-text sm:pl-6">Name</TableHead>
             <TableHead className="text-soft-text">Phone</TableHead>
             <TableHead className="text-soft-text">Status</TableHead>
             <TableHead className="text-soft-text">Created</TableHead>
@@ -87,15 +69,9 @@ export function LeadsTable({ rows }: LeadsTableProps) {
               key={r.leadId}
               className="border-soft-text/[0.06] transition-colors hover:bg-teal-primary/[0.04]"
             >
-              <TableCell className="pl-5 sm:pl-6">
-                <Badge
-                  variant="outline"
-                  className={`min-w-[3.25rem] justify-center px-2.5 py-0.5 text-sm font-semibold tabular-nums ${respectTone(r.latestRespectScore)}`}
-                >
-                  {r.latestRespectScore ?? "-"}
-                </Badge>
+              <TableCell className="pl-5 font-medium text-soft-text sm:pl-6">
+                {r.name}
               </TableCell>
-              <TableCell className="font-medium text-soft-text">{r.name}</TableCell>
               <TableCell className="font-mono text-xs text-soft-text/85">
                 {r.phone}
               </TableCell>
