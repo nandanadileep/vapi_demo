@@ -1,6 +1,6 @@
 # xyz_clinic Voice Intake
 
-Voice-first patient intake, follow-up, and booking workflow for dermatology / skin & hair clinics.
+Multilingual AI voice intake and consultation booking platform for dermatology and skin/hair clinics.
 
 Built with Next.js App Router, Supabase, Vapi, Sarvam TTS, Deepgram transcription, and provider-side tools (Google Calendar + Twilio).
 
