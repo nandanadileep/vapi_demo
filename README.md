@@ -8,6 +8,10 @@ Built with Next.js App Router, Supabase, Vapi, Sarvam TTS, Deepgram transcriptio
 
 ![xyz_clinic intake screen](public/images/intake-preview.png)
 
+### Dashboard Preview
+
+![xyz_clinic dashboard](public/images/dashboard-preview.png)
+
 ## What This Project Does
 
 - Public intake form (`/`) for patient name, phone, concern, and preferred language.
