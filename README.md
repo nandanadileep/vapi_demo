@@ -185,6 +185,32 @@ npm run build
 - `npm run build` - production build
 - `npm run start` - run built app
 - `npm run lint` - lint checks
+  
+flowchart TD
+    A[Patient\nIntake Form] -->|name, phone, concern, language| B[Next.js API\n/api/leads]
+    B -->|insert lead| C[(Supabase\nleads table)]
+    B -->|trigger outbound call| D[Vapi\nCall Orchestrator]
+
+    D -->|STT| E[Deepgram\nDeepgram nova-2 / flux-general-multi]
+    E -->|transcript text| F[Claude\nclaude-sonnet-4-5]
+    F -->|audio response| G[Sarvam Bulbul v3\nCustom TTS Bridge]
+    G -->|wav audio| D
+
+    F -->|function call| H{Tool Router}
+    H -->|check_availability| I[Google Calendar API]
+    H -->|book_consultation| J[Supabase\nbookings table]
+    H -->|send_whatsapp_info| K[Twilio\nWhatsApp / SMS]
+    H -->|schedule_callback| K
+
+    D -->|end-of-call webhook| L[Next.js API\n/api/vapi/webhook]
+    L -->|transcript| M[Claude\nPost-call Analysis]
+    M -->|summary + respect score| N[(Supabase\ncalls table)]
+
+    N -->|read| O[Dashboard\n/dashboard]
+    C -->|read| O
+
+
+
 
 ## License
 
