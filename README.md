@@ -180,6 +180,14 @@ npm run build
   Telephony trial provider behavior (external account setting), not app UI logic.
 
 ## Tech Scripts
+
+- `npm run dev` - local development
+- `npm run build` - production build
+- `npm run start` - run built app
+- `npm run lint` - lint checks
+
+
+
 <svg width="100%" viewBox="0 0 680 860" role="img" style="" xmlns="http://www.w3.org/2000/svg">
 <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">EmpathyFlow call flow</title>
 <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Step by step flowchart of the EmpathyFlow voice pipeline from patient intake to post-call analysis</desc>
@@ -272,11 +280,6 @@ npm run build
 </g>
 
 </svg>
-- `npm run dev` - local development
-- `npm run build` - production build
-- `npm run start` - run built app
-- `npm run lint` - lint checks
-
 <img width="680" height="860" alt="empathyflow_flowchart" src="https://github.com/user-attachments/assets/0686f4a3-21b2-4252-994b-2c829ef9463e" />
 
 
